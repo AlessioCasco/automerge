@@ -1,0 +1,13 @@
+{
+    "access_token" : "token",
+    "owner" : "AlessioCasco",
+    "github_user" : "AlessioCasco",
+    "repos" : [
+        "terraform-vault",
+        "terraform-aws"
+    ],
+    "prefixes" : [
+        "[DEPENDENCIES] Update Terraform",
+        "[DEPENDABOT]"
+    ]
+}
