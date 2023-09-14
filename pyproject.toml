@@ -1,0 +1,6 @@
+[tool.ruff]
+# Select everything
+select = ["E", "F", "Q", "W"]
+
+# Avoid enforcing line-length violations (`E501`)
+ignore = ["E501"]
