@@ -1,0 +1,47 @@
+image:
+  repository: alessiocasco/automerge
+  tag: latest
+  pullPolicy: Always
+
+serviceAccount:
+  annotations:
+    my-annotation: "true"
+  imagePullSecrets:
+    - name: docker-registry
+    - name: aws-registry
+
+job:
+  schedule: "*/1 14-15 * * *"
+  completions: 1
+  parallelism: 1
+  restartPolicy: Never
+  # annotations:
+  #   vault.hashicorp.com/agent-cache-enable: "true"
+  #   vault.hashicorp.com/agent-inject: "true"
+  #   vault.hashicorp.com/agent-pre-populate-only : "true"
+
+  # args: ["python", "main.py", "--config", "/vault/secrets/config.json"]
+  args: ["python", "main.py", "--config", "/app/config/config.json"]
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "500m"
+    limits:
+      memory: "128Mi"
+      cpu: "1000m"
+
+secret:
+  config: |
+    {
+        "access_token" : "token",
+        "owner" : "AlessioCasco",
+        "github_user" : "AlessioCasco",
+        "repos" : [
+            "terraform-vault",
+            "terraform-aws"
+        ],
+        "prefixes" : [
+            "[DEPENDENCIES] Update Terraform",
+            "[DEPENDABOT]"
+        ]
+    }
