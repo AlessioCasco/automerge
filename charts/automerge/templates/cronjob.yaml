@@ -1,0 +1,50 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name}}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Release.Name }}
+spec:
+  schedule: "{{ .Values.job.schedule }}"
+  jobTemplate:
+    spec:
+      {{- if .Values.job.completions}}
+      completions: {{ .Values.job.completions }}
+      {{- end }}
+      {{- if .Values.job.parallelism}}
+      parallelism: {{ .Values.job.parallelism }}
+      {{- end}}
+      template:
+        metadata:
+          {{- if .Values.job.annotations }}
+          annotations:
+              {{- toYaml .Values.job.annotations | nindent 12 }}
+          {{- end }}
+        spec:
+          serviceAccountName: {{ .Release.Name }}
+          restartPolicy: {{ .Values.job.restartPolicy }}
+          containers:
+            - name: automerge
+              image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              args: {{  range .Values.job.args }}
+                - {{ . }}
+              {{- end }}
+              resources:
+              {{- toYaml .Values.job.resources | nindent 16 }}
+        {{- if .Values.secret}}    
+              volumeMounts:   
+                - name: {{ .Release.Name }}-conf
+                  mountPath: "/app/config"
+                  readOnly: true
+          volumes:
+            - name: {{ .Release.Name }}-conf
+              secret:
+                secretName: {{ .Release.Name }}
+                items:
+                - key: config.json
+                  path: config.json
+        {{- end }}                    
+  

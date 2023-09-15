@@ -52,7 +52,12 @@ python3 main.py
 ```bash
 docker run -d -v ./config.json:/app/config.json --name automerge alessiocasco/automerge:latest
 ```
-#### Options
+### Helm
+Move in `/charts/automerge`, tune your `values.yaml` file and run:
+```
+helm install -f values.yaml automerge -n <your_namespace> .
+```
+### Options
 ```bash
 options:
   -h, --help            show this help message and exit
@@ -60,16 +65,16 @@ options:
                         JSON file holding the GitHub access token, default is .config.json
   --approve_all         Approves all PRs that match the prefixes in the config
 ```
+
+### Codeowners
 Since the GitHub user leveraged by Automerge has to be able to comment, approve and merge pull requests, depending on your GitHub configs it may be required to add such user in the [codeowners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) file and also as writer for the repository.
 
-
+## Usage
 This tool is intended to run as a k8s cronjob during the night; every ~15 minutes for couple of hours so it can close as many pull requests as possible.
 Something like:
 ```cron
 */15 3-5 * * *
 ```
-
-### Codeowners
 
 ## What it does at every run:
 * Gets all pull requests from every repo listed in the config
