@@ -102,4 +102,4 @@ Automerge ignores all pull requests having terraform differences or that result 
   * We may add a parameter to the config where we define the behaviour of automerge for specific repos.
     * ie: instead of syncing from master and comment, we can only sync
 * [Issue](https://github.com/AlessioCasco/automerge/issues/7)
-* Atlantis [doesn't have an API to unlock pull requests](https://github.com/runatlantis/atlantis/issues/733), so we can't unlock everything before starting autoplan, this may result in automerge unable to plan specific pull requests until the lock is manually released. A solution may be to intercept the message, unlock it and plan it on the next run.
+* Atlantis [doesn't have an API to unlock pull requests](https://github.com/runatlantis/atlantis/issues/733), so we can't unlock everything before starting automerge, this may result in automerge being unable to plan specific pull requests until the lock is manually released. A solution may be to intercept the message, unlock it and plan it on the next run.
