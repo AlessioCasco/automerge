@@ -101,5 +101,5 @@ Automerge ignores all pull requests having terraform differences or that result 
 * Automerge does not work really well with repos that have Atlantis set to automatic plan every time there is a change in the code. This conflicts with the syncing from master + the `atlantis plan` comments and may end up with errors shown in the comments.
   * We may add a parameter to the config where we define the behaviour of automerge for specific repos.
     * ie: instead of syncing from master and comment, we can only sync
-* #7 Once a pull request shows diffs it will be ignored completely by automerge. This is bad since sometimes those diffs are fixed during the day.
-  * We can add a specific option to force the plan of all pull requests ignoring the label and the message.
+* [Issue](https://github.com/AlessioCasco/automerge/issues/7)
+* Atlantis [doesn't have an API to unlock pull requests](https://github.com/runatlantis/atlantis/issues/733), so we can't unlock everything before starting autoplan, this may result in automerge unable to plan specific pull requests until the lock is manually released. A solution may be to intercept the message, unlock it and plan it on the next run.
