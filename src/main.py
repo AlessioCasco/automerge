@@ -174,6 +174,8 @@ def get_pull_requests(
         pull_requests = json.loads(response.text)
 
         # Filter pull requests that start with "[DEPENDENCIES]..."
+        # ToDo: Move to regex
+        # https://github.com/AlessioCasco/automerge/issues/10
         for pr in pull_requests:
             if pr["title"].startswith(tuple(pr_prefixes)):
                 dependency_prs.append(pr)
