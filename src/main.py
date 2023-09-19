@@ -33,7 +33,7 @@ def main():
             "--approve_all",
             action="store_true",
             default=False,
-            help="Approves all PRs that match the prefixes in the config")
+            help="Approves all PRs that match the filters in the config")
         args = parser.parse_args()
 
         # Read JSON config file
@@ -48,8 +48,8 @@ def main():
         github_user = use_config(config_file, "github_user")
         # List of repos to check
         repos = use_config(config_file, "repos")
-        # Prefixes used to match the PR we want to manage
-        pr_prefixes = use_config(config_file, "prefixes")
+        # filters used to match the PR we want to manage
+        filters = use_config(config_file, "filters")
 
         # base_repos_url = f"https://api.github.com/repos/{owner}/{REPO}/"
         base_repos_url = f"https://api.github.com/repos/{owner}/"
@@ -61,7 +61,7 @@ def main():
         }
 
         all_pulls = get_pull_requests(
-            base_repos_url, repos, headers, pr_prefixes)
+            base_repos_url, repos, headers, filters)
 
         if args.approve_all:
             print("Only Approving Now")
@@ -133,32 +133,36 @@ def use_config(config: dict, key: str):
     try:
         return config[key]
 
-    except KeyError as exc:
-        raise KeyError(
-            f'Error reading key "{key}" from config'
-        ) from exc
+    except KeyError:
+        print(f'Error reading key "{key}" from config')
+        raise SystemExit(1)
 
 
 def get_pull_requests(
         base_repo_url: str,
         repos: list,
         headers: dict,
-        pr_prefixes: list):
+        filters: list):
     """
-    Returns all pull requests that match the prefix in the title
+    Returns all pull requests that match the filter in the title
     :param base_repos_url: The base URL for the repo: is: https://api.github.com/repos/octocat
     :type base_repos_url: str
     :param repos: List of repos to check
     :type repos: list
     :param headers: Headers used in the API calls
     :type headers: dict
-    :param pr_prefixes: Prefix used to filter out PRs titles
-    :type pr_prefixes: list
+    :param filters: Regex used to filter out pull requests titles
+    :type filters: list
     :raises SystemExit: _description_
     :return: _description_
     :rtype: _type_
     """
     dependency_prs = []
+
+    # Check that we have at least one filter
+    if not filters:
+        print("No filters to match, please provide at least one, exiting")
+        raise SystemExit(1)
 
     for repo in repos:
         pr_url = base_repo_url + repo + "/pulls?per_page=100"
@@ -173,12 +177,13 @@ def get_pull_requests(
 
         pull_requests = json.loads(response.text)
 
-        # Filter pull requests that start with "[DEPENDENCIES]..."
+        # Filter pull requests by title"
         for pr in pull_requests:
-            if pr["title"].startswith(tuple(pr_prefixes)):
-                dependency_prs.append(pr)
+            for filter in filters:
+                if re.match(filter, pr["title"]):
+                    dependency_prs.append(pr)
 
-    print("All done\n")
+    print("All pull requests fetched\n")
     return dependency_prs
 
 
@@ -285,7 +290,7 @@ def create_pr_lists(all_pull_req: list, headers: dict):
 
 def approve_all_prs(headers, all_pulls, github_user):
     """
-    Approves all not approved PRs matching the prefixes from the config
+    Approves all not approved PRs matching the filters from the config
     """
     approved = False
     for pr in all_pulls:

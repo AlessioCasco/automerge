@@ -41,7 +41,8 @@ secret:
           "terraform-config"
         ],
         "prefixes" : [
-          "[DEPENDENCIES] Update Terraform",
-          "[DEPENDABOT]"
+          "^\\[DEPENDENCIES\\] Update Terraform",
+          "^\\[DEPENDABOT\\]",
+          "^\\[Dependabot\\]"
         ]
     }
