@@ -11,7 +11,7 @@ serviceAccount:
     - name: aws-registry
 
 job:
-  schedule: "*/1 14-15 * * *"
+  schedule: "*/20 3-5 * * *"
   completions: 1
   parallelism: 1
   restartPolicy: Never
@@ -34,14 +34,15 @@ secret:
   config: |
     {
         "access_token" : "token",
-        "owner" : "AlessioCasco",
+        "owner" : "my_company",
         "github_user" : "AlessioCasco",
         "repos" : [
-            "terraform-vault",
-            "terraform-aws"
+          "terraform-vault",
+          "terraform-config"
         ],
         "prefixes" : [
-            "[DEPENDENCIES] Update Terraform",
-            "[DEPENDABOT]"
+          "^\\[DEPENDENCIES\\] Update Terraform",
+          "^\\[DEPENDABOT\\]",
+          "^\\[Dependabot\\]"
         ]
     }
