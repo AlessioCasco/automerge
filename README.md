@@ -12,20 +12,21 @@ Automerge does exactly this: Checks every PR that has a title that matches a spe
 It works along with the [atlantis](runatlantis.io) tool.
 
 ## Dependencies
-Automerge (for now) works only with [github](github.com) repos and [atlantis](runatlantis.io), so you need to have a working atlantis installation to use it.
+Automerge (for now) works only with [github](github.com) repos and [atlantis](runatlantis.io), so you need to have a working Atlantis installation to use it.
 
 ## Configuration
 ```json
 {
     "access_token" : "token",
-    "owner" : "AlessioCasco",
+    "owner" : "my_company",
     "github_user" : "AlessioCasco",
     "repos" : [
-        "terraform"
+      "terraform-vault",
+      "terraform-config"
     ],
     "prefixes" : [
-        "[DEPENDENCIES] Update Terraform",
-        "[DEPENDABOT]"
+      "[DEPENDENCIES] Update Terraform",
+      "[DEPENDABOT]"
     ]
 }
 ```
@@ -34,11 +35,21 @@ Automerge (for now) works only with [github](github.com) repos and [atlantis](ru
   * Full control of private repositories.
 * `owner`: Owner of the repos where we want to check the pull requests.
 * `github_user`: Github user that owns the `access_token`.
-* `repos`: list of repos that you want to check pull requests from (note that they all need to be under the same owner).
+* `repos`: list of repo names that you want to check pull requests from (note that they all need to be under the same owner).
   * ie `https://github.com/Owner/repo/`
-* `prefixes`: Prefixes that Automerge uses to filter the pull requests you want to check from all the others.
+* `prefixes`: Prefixes that Automerge uses to filter the pull requests it has to consider. This uses the `startswith` function so regex are not supported (yet #10).
+  * Basically what you set in the [prefix](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#commit-message) option for dependabot or the equivalent option [commitMessagePrefix](https://docs.renovatebot.com/configuration-options/#commitmessageprefix) for renovate
 
-## Use
+## GitHub Config
+### Branch protection
+If you [Require status checks from Atlantis to pass before merging](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks) on your [Branch protection rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/managing-a-branch-protection-rule), make sure that the atlantis ones are set to `atlantis/plan` only.
+Automerge will never apply anything (for now) so having an `atlantis/apply` check set as required will break the ability for automerge to merge pull requests.
+This because automerge does not `bypass branch protections`. Before merging any pull request it waits that all checks are green. 
+
+### Codeowners
+Since the GitHub user leveraged by Automerge has to be able to comment, approve and merge pull requests, depending on your GitHub configs it may be required to add such a user in the [codeowners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) file and also as writer for the repository.
+
+## Usage
 ### Options
 ```bash
 options:
@@ -69,14 +80,11 @@ Move to `/charts/automerge`, tune your `values.yaml` file and run:
 helm install -f values.yaml automerge -n <your_namespace> .
 ```
 
-### Codeowners
-Since the GitHub user leveraged by Automerge has to be able to comment, approve and merge pull requests, depending on your GitHub configs it may be required to add such a user in the [codeowners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) file and also as writer for the repository.
-
 ## Usage
 This tool is intended to run as a k8s cronjob during the night; every ~15 minutes for a couple of hours so it can close as many pull requests as possible.
 Something like:
 ```cron
-*/15 3-5 * * *
+*/20 3-5 * * *
 ```
 
 ## What it does at every run:
@@ -101,5 +109,5 @@ Automerge ignores all pull requests having terraform differences or that result 
 * Automerge does not work really well with repos that have Atlantis set to automatic plan every time there is a change in the code. This conflicts with the syncing from master + the `atlantis plan` comments and may end up with errors shown in the comments.
   * We may add a parameter to the config where we define the behaviour of automerge for specific repos.
     * ie: instead of syncing from master and comment, we can only sync
-* [Issue](https://github.com/AlessioCasco/automerge/issues/7)
+* [Doesn't have a --force option](https://github.com/AlessioCasco/automerge/issues/7)
 * Atlantis [doesn't have an API to unlock pull requests](https://github.com/runatlantis/atlantis/issues/733), so we can't unlock everything before starting automerge, this may result in automerge being unable to plan specific pull requests until the lock is manually released. A solution may be to intercept the message, unlock it and plan it on the next run.
