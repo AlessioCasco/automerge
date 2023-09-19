@@ -37,7 +37,7 @@ Automerge (for now) works only with [github](github.com) repos and [atlantis](ru
 * `github_user`: Github user that owns the `access_token`.
 * `repos`: list of repo names that you want to check pull requests from (note that they all need to be under the same owner).
   * ie `https://github.com/Owner/repo/`
-* `prefixes`: Prefixes that Automerge uses to filter the pull requests it has to consider. This uses the `startswith` function so regex are not supported (yet #10).
+* `prefixes`: Prefixes that Automerge uses to filter the pull requests it has to consider. This uses the `startswith` function so regex are not supported (yet [issue](https://github.com/AlessioCasco/automerge/issues/10)).
   * Basically what you set in the [prefix](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#commit-message) option for dependabot or the equivalent option [commitMessagePrefix](https://docs.renovatebot.com/configuration-options/#commitmessageprefix) for renovate
 
 ## GitHub Config
