@@ -6,7 +6,7 @@
         "terraform-vault",
         "terraform-aws"
     ],
-    "prefixes" : [
+    "filters" : [
         "^\\[DEPENDENCIES\\] Update Terraform",
         "^\\[DEPENDABOT\\]",
         "^\\[Dependabot\\]"

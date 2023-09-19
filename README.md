@@ -24,9 +24,10 @@ Automerge (for now) works only with [github](github.com) repos and [atlantis](ru
       "terraform-vault",
       "terraform-config"
     ],
-    "prefixes" : [
-      "[DEPENDENCIES] Update Terraform",
-      "[DEPENDABOT]"
+    "filters" : [
+      "^\\[DEPENDENCIES\\] Update Terraform",
+      "^\\[DEPENDABOT\\]",
+      "^\\[Dependabot\\]"
     ]
 }
 ```
@@ -37,8 +38,9 @@ Automerge (for now) works only with [github](github.com) repos and [atlantis](ru
 * `github_user`: Github user that owns the `access_token`.
 * `repos`: list of repo names that you want to check pull requests from (note that they all need to be under the same owner).
   * ie `https://github.com/Owner/repo/`
-* `prefixes`: Prefixes that Automerge uses to filter the pull requests it has to consider. This uses the `startswith` function so regex are not supported (yet [issue](https://github.com/AlessioCasco/automerge/issues/10)).
-  * Basically what you set in the [prefix](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#commit-message) option for dependabot or the equivalent option [commitMessagePrefix](https://docs.renovatebot.com/configuration-options/#commitmessageprefix) for renovate
+* `filters`: Regex that Automerge uses to filter the pull requests it has to consider.
+  * This is usually what you set in the [prefix](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#commit-message) option for dependabot or the equivalent [commitMessagePrefix](https://docs.renovatebot.com/configuration-options/#commitmessageprefix) option for renovate.
+  * Be aware that you you need to escape the backslashes in the JSON string to properly represent the regular expressions, [see the configuration section](#configuration) for an example.
 
 ## GitHub Config
 ### Branch protection
@@ -56,7 +58,7 @@ options:
   -h, --help            show this help message and exit
   --config_file CONFIG_FILE
                         JSON file holding the GitHub access token, default is .config.json
-  --approve_all         Approves all PRs that match the prefixes in the config
+  --approve_all         Approves all PRs that match the filters in the config
 ```
 
 ### Python

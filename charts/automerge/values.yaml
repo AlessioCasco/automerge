@@ -40,7 +40,7 @@ secret:
           "terraform-vault",
           "terraform-config"
         ],
-        "prefixes" : [
+        "filters" : [
           "^\\[DEPENDENCIES\\] Update Terraform",
           "^\\[DEPENDABOT\\]",
           "^\\[Dependabot\\]"
