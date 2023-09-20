@@ -1,14 +1,14 @@
 {
     "access_token" : "token",
-    "owner" : "AlessioCasco",
-    "github_user" : "AlessioCasco",
-    "repos" : [
-        "terraform-vault",
-        "terraform-aws"
-    ],
     "filters" : [
         "^\\[DEPENDENCIES\\] Update Terraform",
         "^\\[DEPENDABOT\\]",
         "^\\[Dependabot\\]"
+    ],
+    "github_user" : "AlessioCasco",
+    "owner" : "AlessioCasco",
+    "repos" : [
+        "terraform-vault",
+        "terraform-aws"
     ]
 }

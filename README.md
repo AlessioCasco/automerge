@@ -17,30 +17,31 @@ Automerge (for now) works only with [github](github.com) repos and [atlantis](ru
 ## Configuration
 ```json
 {
-    "access_token" : "token",
-    "owner" : "my_company",
-    "github_user" : "AlessioCasco",
-    "repos" : [
-      "terraform-vault",
-      "terraform-config"
-    ],
-    "filters" : [
-      "^\\[DEPENDENCIES\\] Update Terraform",
-      "^\\[DEPENDABOT\\]",
-      "^\\[Dependabot\\]"
-    ]
+  "access_token" : "token",
+  "filters" : [
+    "^\\[DEPENDENCIES\\] Update Terraform",
+    "^\\[DEPENDABOT\\]",
+    "^\\[Dependabot\\]"
+  ],
+  "github_user" : "AlessioCasco",
+  "owner" : "my_company",
+  "repos" : [
+    "terraform-vault",
+    "terraform-aws"
+  ]
 }
 ```
 
 * `access_token`: Token (classic) from GitHub that needs to have the following Scopes:
   * Full control of private repositories.
-* `owner`: Owner of the repos where we want to check the pull requests.
-* `github_user`: Github user that owns the `access_token`.
-* `repos`: list of repo names that you want to check pull requests from (note that they all need to be under the same owner).
-  * ie `https://github.com/Owner/repo/`
 * `filters`: Regex that Automerge uses to filter the pull requests it has to consider.
   * This is usually what you set in the [prefix](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#commit-message) option for dependabot or the equivalent [commitMessagePrefix](https://docs.renovatebot.com/configuration-options/#commitmessageprefix) option for renovate.
   * Be aware that you you need to escape the backslashes in the JSON string to properly represent the regular expressions, [see the configuration section](#configuration) for an example.
+* `github_user`: Github user that owns the `access_token`.
+* `owner`: Owner of the repos where we want to check the pull requests.
+* `repos`: list of repo names that you want to check pull requests from (note that they all need to be under the same owner).
+  * ie `https://github.com/Owner/repo/`
+
 
 ## GitHub Config
 ### Branch protection

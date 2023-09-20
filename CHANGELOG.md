@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - 2023-10-19
 - Supporting regex in pull request titles. (#12)
-  - Breaking changes: config requires the key `prefixes` to be replaced to `filters` now
+  - Breaking changes: config requires the key `prefixes` to be replaced to `filters`
 
 ## [0.1.1] - 2023-10-18
 - Dependabot Pip: Bump rich from 13.5.2 to 13.5.3 (#9)
