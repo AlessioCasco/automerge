@@ -1,6 +1,8 @@
 name: At every commit
 on:
-  workflow_call:
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   ruff:

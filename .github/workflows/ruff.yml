@@ -1,8 +1,4 @@
 name: Ruff-and-tests
-# on:
-#   push:
-#     branches-ignore:
-#       - main
 
 on:
   workflow_call:
