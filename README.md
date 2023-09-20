@@ -1,5 +1,5 @@
-![ruff](https://github.com/AlessioCasco/automerge/actions/workflows/ruff.yml/badge.svg)
-![docker Build](https://github.com/AlessioCasco/automerge/actions/workflows/build_and_push.yml/badge.svg)
+![Lint & tests](https://github.com/AlessioCasco/automerge/actions/workflows/at-every-commit.yml/badge.svg)
+![Docker Build](https://github.com/AlessioCasco/automerge/actions/workflows/build_and_push.yml/badge.svg)
 
 # Automerge for GitHub and Atlantis
 
