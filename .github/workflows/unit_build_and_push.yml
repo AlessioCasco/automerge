@@ -8,6 +8,11 @@ name: build_and_push
 
 on:
   workflow_call:
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
 
 env:
   REGISTRY_IMAGE: alessiocasco/automerge

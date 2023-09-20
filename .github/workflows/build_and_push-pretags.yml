@@ -15,4 +15,7 @@ jobs:
     uses: ./.github/workflows/unit_python_tests.yml
   docker-build-and-push:
     uses: ./.github/workflows/unit_build_and_push.yml
-    
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  
