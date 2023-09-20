@@ -17,34 +17,37 @@ Automerge (for now) works only with [github](github.com) repos and [atlantis](ru
 ## Configuration
 ```json
 {
-    "access_token" : "token",
-    "owner" : "my_company",
-    "github_user" : "AlessioCasco",
-    "repos" : [
-      "terraform-vault",
-      "terraform-config"
-    ],
-    "prefixes" : [
-      "[DEPENDENCIES] Update Terraform",
-      "[DEPENDABOT]"
-    ]
+  "access_token" : "token",
+  "filters" : [
+    "^\\[DEPENDENCIES\\] Update Terraform",
+    "^\\[DEPENDABOT\\]",
+    "^\\[Dependabot\\]"
+  ],
+  "github_user" : "AlessioCasco",
+  "owner" : "my_company",
+  "repos" : [
+    "terraform-vault",
+    "terraform-aws"
+  ]
 }
 ```
 
 * `access_token`: Token (classic) from GitHub that needs to have the following Scopes:
   * Full control of private repositories.
-* `owner`: Owner of the repos where we want to check the pull requests.
+* `filters`: Regex that Automerge uses to filter the pull requests it has to consider.
+  * This is usually what you set in the [prefix](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#commit-message) option for dependabot or the equivalent [commitMessagePrefix](https://docs.renovatebot.com/configuration-options/#commitmessageprefix) option for renovate.
+  * Be aware that you you need to escape the backslashes in the JSON string to properly represent the regular expressions, [see the configuration section](#configuration) for an example.
 * `github_user`: Github user that owns the `access_token`.
+* `owner`: Owner of the repos where we want to check the pull requests.
 * `repos`: list of repo names that you want to check pull requests from (note that they all need to be under the same owner).
   * ie `https://github.com/Owner/repo/`
-* `prefixes`: Prefixes that Automerge uses to filter the pull requests it has to consider. This uses the `startswith` function so regex are not supported (yet [issue](https://github.com/AlessioCasco/automerge/issues/10)).
-  * Basically what you set in the [prefix](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#commit-message) option for dependabot or the equivalent option [commitMessagePrefix](https://docs.renovatebot.com/configuration-options/#commitmessageprefix) for renovate
+
 
 ## GitHub Config
 ### Branch protection
 If you [Require status checks from Atlantis to pass before merging](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks) on your [Branch protection rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/managing-a-branch-protection-rule), make sure that the atlantis ones are set to `atlantis/plan` only.
 Automerge will never apply anything (for now) so having an `atlantis/apply` check set as required will break the ability for automerge to merge pull requests.
-This because automerge does not `bypass branch protections`. Before merging any pull request it waits that all checks are green. 
+This because automerge does not `bypass branch protections`. Before merging any pull request it waits that all checks are green.
 
 ### Codeowners
 Since the GitHub user leveraged by Automerge has to be able to comment, approve and merge pull requests, depending on your GitHub configs it may be required to add such a user in the [codeowners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) file and also as writer for the repository.
@@ -56,7 +59,7 @@ options:
   -h, --help            show this help message and exit
   --config_file CONFIG_FILE
                         JSON file holding the GitHub access token, default is .config.json
-  --approve_all         Approves all PRs that match the prefixes in the config
+  --approve_all         Approves all PRs that match the filters in the config
 ```
 
 ### Python

@@ -4,5 +4,4 @@ fault-injection.iml
 .DS_Store
 Logs/
 lib64
-python*
 myenv/

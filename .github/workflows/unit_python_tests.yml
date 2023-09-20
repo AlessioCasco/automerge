@@ -1,0 +1,16 @@
+name: python tests
+on:
+  workflow_call:
+
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r ./requirements.txt
+      - name: Test with unittest
+        run: |
+          python3 -m unittest discover -s ./tests  -p 'test_*.py'
