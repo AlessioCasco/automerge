@@ -1,5 +1,4 @@
 name: build_and_push_pretags
-
 on:
   push:
     tags:
