@@ -1,11 +1,5 @@
 name: build_and_push
 
-# on:
-#   push:
-#     tags:
-#       - 'v*'
-#       - '!v*-pre*'
-
 on:
   workflow_call:
     secrets:

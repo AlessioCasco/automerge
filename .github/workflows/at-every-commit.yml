@@ -5,7 +5,7 @@ on:
       - main
 
 jobs:
-  ruff:
+  lint:
     uses: ./.github/workflows/unit_ruff.yml
-  python-tests:
+  testing:
     uses: ./.github/workflows/unit_python_tests.yml
