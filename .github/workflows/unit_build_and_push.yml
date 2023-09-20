@@ -13,10 +13,6 @@ env:
   REGISTRY_IMAGE: alessiocasco/automerge
 
 jobs:
-  ruff:
-    uses: ./.github/workflows/ruff.yml
-  python-tests:
-    uses: ./.github/workflows/python_tests.yml
   docker-build-and-push:
     runs-on: ubuntu-latest
     steps:
