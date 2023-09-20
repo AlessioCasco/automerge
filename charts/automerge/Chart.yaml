@@ -2,7 +2,7 @@ apiVersion: v2
 name: automerge
 description: Automerge is a tool to automatically merge pull requests on GitHub.
 version: 0.1.0
-appVersion: 0.1.0
+appVersion: 0.2.0
 type: application
 home: github.com/AlessioCasco/automerge
 icon: https://upload.wikimedia.org/wikipedia/commons/8/87/Octicons-git-pull-request.svg
