@@ -10,4 +10,3 @@ jobs:
       - uses: chartboost/ruff-action@v1
         with:
           args: --ignore E501
-
