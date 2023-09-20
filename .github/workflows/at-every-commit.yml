@@ -1,0 +1,10 @@
+name: At every commit
+on:
+  workflow_call:
+
+jobs:
+  ruff:
+    uses: ./.github/workflows/ruff.yml
+  python-tests:
+    uses: ./.github/workflows/python_tests.yml
+
