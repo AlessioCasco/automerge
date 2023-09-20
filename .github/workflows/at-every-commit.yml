@@ -6,7 +6,7 @@ on:
 
 jobs:
   ruff:
-    uses: ./.github/workflows/units/unit_ruff.yml
+    uses: ./.github/workflows/unit_ruff.yml
   python-tests:
-    uses: ./.github/workflows/units/unit_python_tests.yml
+    uses: ./.github/workflows/unit_python_tests.yml
 

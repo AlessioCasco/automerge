@@ -10,9 +10,9 @@ env:
 
 jobs:
   ruff:
-    uses: ./.github/workflows/units/unit_ruff.yml
+    uses: ./.github/workflows/unit_ruff.yml
   python-tests:
-    uses: ./.github/workflows/units/unit_python_tests.yml
+    uses: ./.github/workflows/unit_python_tests.yml
   docker-build-and-push:
-    uses: ./.github/workflows/units/unit_build_and_push.yml
+    uses: ./.github/workflows/unit_build_and_push.yml
     
