@@ -1,4 +1,4 @@
-name: Ruff and unittest
+name: Ruff-and-tests
 on:
   push:
     branches-ignore:
@@ -11,10 +11,6 @@ jobs:
       - uses: chartboost/ruff-action@v1
         with:
           args: --ignore E501
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install -r ./requirements.txt
-      - name: Test with unittest
-        run: |
-          python3 -m unittest discover -s ./tests  -p 'test_*.py'
+  python-tests:
+    uses: ./.github/workflows/python_tests.yml
+
