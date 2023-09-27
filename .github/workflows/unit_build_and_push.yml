@@ -46,6 +46,6 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           format: 'sarif'
-          image-ref: 'docker.io/${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.tags }}'
+          image-ref: '${{ steps.meta.outputs.tags }}'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
