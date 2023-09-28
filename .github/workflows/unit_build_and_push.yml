@@ -42,13 +42,15 @@ jobs:
       #     tags: ${{ steps.meta.outputs.tags }}
       #     labels: ${{ steps.meta.outputs.labels }}
       #     push: true
-      - name: Debug trivy-action output
+      - name: Debug meta output
         run: echo "${{ steps.meta.outputs.tags }}"
       - uses:  winterjung/split@v2.1.0
         id: split
         with:
-          separator: '\n'
+          separator: ':'
           msg: ${{ steps.meta.outputs.tags }}
+      - name: Debug split output
+        run: echo "${{ steps.split.outputs._0 }}"
       # - name: Run Trivy vulnerability scanner
       #   uses: aquasecurity/trivy-action@master
       #   with:
