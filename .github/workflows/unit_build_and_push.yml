@@ -48,7 +48,7 @@ jobs:
         id: split
         with:
           separator: ':'
-          msg: ${{ steps.meta.outputs.tags }}
+          msg: "alessiocasco/automerge:10.0.2"
       - name: Debug split output
         run: echo "${{ steps.split.outputs._0 }}"
       # - name: Run Trivy vulnerability scanner
