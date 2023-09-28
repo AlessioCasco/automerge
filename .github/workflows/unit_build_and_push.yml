@@ -43,7 +43,7 @@ jobs:
       #     labels: ${{ steps.meta.outputs.labels }}
       #     push: true
       - name: Debug trivy-action output
-        run: echo "${{ steps.trivy.outputs.scan-results }}"
+        run: echo "${{ steps.meta.outputs.tags }}"
       - uses:  winterjung/split@v2.1.0
         id: split
         with:

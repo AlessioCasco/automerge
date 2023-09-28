@@ -11,17 +11,22 @@ serviceAccount:
     - name: aws-registry
 
 job:
-  schedule: "*/20 3-5 * * *"
+  schedule: "*/20 4-6 * * *"
   completions: 1
   parallelism: 1
   restartPolicy: Never
-  # annotations:
-  #   vault.hashicorp.com/agent-cache-enable: "true"
-  #   vault.hashicorp.com/agent-inject: "true"
-  #   vault.hashicorp.com/agent-pre-populate-only : "true"
-
-  # args: ["python", "main.py", "--config", "/vault/secrets/config.json"]
-  args: ["python", "main.py", "--config", "/app/config/config.json"]
+  annotations:
+    vault.hashicorp.com/agent-cache-enable: "true"
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/agent-pre-populate-only : "true"
+    vault.hashicorp.com/role: k8s-tools-automerge
+    vault.hashicorp.com/agent-inject-secret-config.json: development-eu-west-1/tools/secret/automerge/config
+    vault.hashicorp.com/agent-inject-template-config.json: |
+      {{- with secret "development-eu-west-1/tools/secret/automerge/config" -}}
+      {{ .Data.data | toJSON  }}
+      {{- end }}
+  args: ["python", "main.py", "--config", "/vault/secrets/config.json"]
+  # args: ["python", "main.py", "--config", "/app/config/config.json"]
   resources:
     requests:
       memory: "64Mi"
@@ -30,18 +35,19 @@ job:
       memory: "128Mi"
       cpu: "1000m"
 
-secret:
-  config: |
-    {
-        "access_token" : "token",
-        "owner" : "my_company",
-        "github_user" : "AlessioCasco",
-        "repos" : [
-          "terraform-vault",
-          "terraform-config"
-        ],
-        "prefixes" : [
-          "[DEPENDENCIES] Update Terraform",
-          "[DEPENDABOT]"
-        ]
-    }
+# secret:
+#   config: |
+#     {
+#       "access_token" : "token",
+#       "filters" : [
+#           "^\\[DEPENDENCIES\\] Update Terraform",
+#           "^\\[DEPENDABOT\\]",
+#           "^\\[Dependabot\\]"
+#       ],
+#       "github_user" : "AlessioCasco",
+#       "owner" : "AlessioCasco",
+#       "repos" : [
+#           "terraform-vault",
+#           "terraform-aws"
+#       ]
+#     }
