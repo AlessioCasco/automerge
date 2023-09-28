@@ -43,7 +43,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           push: true
       - name: Debug metadata-action output
-        run: echo "${{ steps.meta.outputs.tags }}"
+        run: echo '${{ steps.meta.outputs.tags.split("\n")[0] }}'
       # - name: Run Trivy vulnerability scanner
       #   uses: aquasecurity/trivy-action@master
       #   with:
