@@ -20,7 +20,7 @@ jobs:
       - name: Set tag output
         id: vars
         # strip "v" from tags
-        run: echo "tag=${GITHUB_REF#refs/*/}" | sed 's/^v//' >> $GITHUB_OUTPUT
+        run: echo "tag=${GITHUB_REF#refs/*/}" | sed 's/v//' >> $GITHUB_OUTPUT
       - name: Debug tag output
         run: echo "${{ env.REGISTRY_IMAGE }}:${{ steps.vars.outputs.tag }}"
       # - name: Set up QEMU
