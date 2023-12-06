@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2023-12-06
+- Dependabot Pip: Bump pygments from 2.17.1 to 2.17.2 #29
+- Dependabot Pip: Bump idna from 3.4 to 3.6 #28
+
 ## [1.0.2] - 2023-11-20
 - Dependabot Pip: Bump pygments from 2.16.1 to 2.17.1 #27
 - Dependabot Pip: Bump certifi from 2023.7.22 to 2023.11.17 #26
