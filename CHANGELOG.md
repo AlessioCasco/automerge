@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] - 2024-03-08
+- Handle case when the PR has conflicts (dirty)
+- When renovate comments that there is a new version of the dependency, we close the PR and let it open a new one.
+- Handle pagination on the comments API
+- Handle when the state of the PR is Dismissed
+- Bump pre-commit repos
+- Dependabot Pip: Bump rich from 13.7.0 to 13.7.1 #33
+- Dependabot Pip: Bump urllib3 from 2.1.0 to 2.2.1 #32
+- Dependabot Pip: Bump certifi from 2023.11.17 to 2024.2.2 #31
+
 ## [1.0.3] - 2023-12-06
 - Dependabot Pip: Bump pygments from 2.17.1 to 2.17.2 #29
 - Dependabot Pip: Bump idna from 3.4 to 3.6 #28
