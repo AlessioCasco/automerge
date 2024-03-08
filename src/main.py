@@ -64,7 +64,7 @@ def main():
             approve_all_prs(headers, all_pulls, github_user)
             raise SystemExit(0)
 
-        pr_list_no_comments, pr_with_diffs, pr_list_no_changes, pr_list_error = create_pr_lists(
+        pr_list_no_comments, pr_with_diffs, pr_list_no_changes, pr_list_error, list_to_be_closed = create_pr_lists(
             all_pulls, headers)
 
         if pr_list_no_changes:
@@ -73,27 +73,51 @@ def main():
 
         if pr_with_diffs:
             print("\nUnlocking PR\n")
-            comment_pull_req(pr_with_diffs, "atlantis unlock",
-                            headers, False)
-            # TODO: Wait untill atlantis sends the comment, confirming the PR is unlocked.
-            time.sleep(4)
-            comment_pull_req(pr_with_diffs, "This PR will be ignored by automerge",
-                            headers, False)
+            multi_comments_pull_req(pr_with_diffs, "atlantis unlock", "This PR will be ignored by automerge", headers)
             set_label_to_pull_request(pr_with_diffs, "automerge_ignore", headers)
 
         if pr_list_no_comments or pr_list_error:
             print("\n\nCommenting to plan PRs\n")
-            comment_pull_req(
-                pr_list_no_comments +
-                pr_list_error,
-                "atlantis plan",
-                headers)
+            for pr in pr_list_no_comments + pr_list_error:
+                mergeable_state = get_mergeable_state(pr["url"], headers)
+                if mergeable_state == "dirty":
+                    print(f"PR {pr['number']} Is dirty, there are conflicts, ignoring...")
+                    multi_comments_pull_req([pr], "atlantis unlock", "This PR will be ignored by automerge", headers)
+                    set_label_to_pull_request([pr], "automerge_conflic", headers)
+                    continue
+                comment_pull_req([pr], "atlantis plan", headers)
+
+        if list_to_be_closed:
+            print("\nClosing old PRs\n")
+            multi_comments_pull_req(list_to_be_closed, "This PR will be closed since there is a new version of this dependency", "atlantis unlock", headers)
+            close_pull_requests(list_to_be_closed, headers)
 
         print("\nAll done, exiting\n")
 
     except KeyboardInterrupt:
         print("\n\nExiting by user request.\n")
 
+
+def close_pull_requests(pull_req_list: list, headers: dict):
+    """Closes the specified pull requests.
+    :param pull_req_list: A list of pull requests to be closed
+    :type pull_req_list: list
+    :param headers: Headers used in the API calls
+    :type headers: dict
+    """
+    for pull_req in pull_req_list:
+        url = pull_req["issue_url"]
+        print(url)
+        response = requests.patch(
+            url,
+            headers=headers,
+            json={"state": "closed"},
+            timeout=10,
+        )
+        if response.status_code != 200:
+            print(f"Failed to close PR: {pull_req['title']}")
+        else:
+            print(f"Closed PR: {pull_req['title']}")
 
 def read_config(config_file: str):
     """_summary_.
@@ -161,7 +185,7 @@ def get_pull_requests(
     for repo in repos:
         pr_url = base_repo_url + repo + "/pulls?per_page=100"
 
-        print(f"Fetching all PR\'s from {repo}")
+        print(f"Fetching all PR's from {repo}")
 
         response = requests.get(pr_url, headers=headers, timeout=10)
         if response.status_code != 200:
@@ -223,60 +247,88 @@ def create_pr_lists(all_pull_req: list, headers: dict):
         r"Plan Error|Plan Failed|Continued plan output from previous comment.|via the Atlantis UI|All Atlantis locks for this PR have been unlocked and plans discarded|Renovate will not automatically rebase this PR|Apply Failed|Apply Error")
     regexp_pr_still_working = re.compile(r"atlantis plan|atlantis apply")
     regexp_pr_no_project = re.compile(r"Ran Plan for 0 projects")
+    regexp_new_version = re.compile(r"A newer version of")
 
     list_no_comments = []
     list_with_diffs = []
     list_no_changes = []
     list_error = []
+    list_to_be_closed = []
 
     for pull_req in all_pull_req:
 
-        comments_url = pull_req["issue_url"] + "/comments?per_page=100"
-        response = requests.get(comments_url, headers=headers, timeout=10)
-        if response.status_code != 200:
-            print(
-                f"Failed to fetch comments from pull request {pull_req['number']} in repo {pull_req['head']['repo']['name']} \n Status code: {response.status_code} \n Reason: {json.loads(response.text)}")
-            raise SystemExit(1)
-        pull_request_comments = json.loads(response.text)
+        def get_last_comment(pull_req_url: str, headers: dict):
+            """Returns the last comment from a given pull request.
+            :param pull_req_url: URL of the pull request
+            :type pull_req_url: str
+            :param headers: Headers used in the API calls
+            :type headers: dict
+            :return: The last comment from the pull request
+            :rtype: dict
+            """
+            comments_url = pull_req_url + "/comments?per_page=50"
+            response = requests.get(comments_url, headers=headers, timeout=10)
+            if response.status_code != 200:
+                return None
+            comments = json.loads(response.text)
+            # handle pagination using headers
+            if "Link" in response.headers:
+                links = response.headers["Link"].split(", ")
+                for link in links:
+                    if 'rel="last"' in link:
+                        last_page_url = link[link.index("<") + 1 : link.index(">")]
+                        last_page_response = requests.get(last_page_url, headers=headers, timeout=10)
+                        if last_page_response.status_code == 200:
+                            last_page_comments = json.loads(last_page_response.text)
+                            if last_page_comments:
+                                return last_page_comments[-1]
+            if comments:
+                return comments[-1]
 
-        # Check if the PRs last comment is "No changes. Your infrastructure
-        # matches the configuration"
-        if not pull_request_comments:
-            list_no_comments.append(pull_req)
-            print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: No Comments, new pr.")
-            continue
-        if regexp_pr_diff.search(pull_request_comments[-1]["body"]):
-            list_with_diffs.append(pull_req)
-            print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: There are diffs.")
-            continue
-        if regexp_pr_error.search(pull_request_comments[-1]["body"]):
-            list_error.append(pull_req)
-            print(
-                f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Has errors.")
-            continue
-        if regexp_pr_no_changes.search(pull_request_comments[-1]["body"]):
-            list_no_changes.append(pull_req)
-            print(
-                f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: No changes.")
-            continue
-        if regexp_pr_still_working.search(pull_request_comments[-1]["body"]):
-            print(
-                f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Atlantis is still working here, ignoring this PR for now.")
-            continue
-        if regexp_pr_ignore.search(pull_request_comments[-1]["body"]):
-            print(
-                f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Will be ignored, there are diffs")
-            continue
-        if regexp_pr_no_project.search(pull_request_comments[-1]["body"]):
-            print(
-                f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Will be ignored, 0 projects planned, usually due to modules update or no file changed, check and close them yourself please")
-            set_label_to_pull_request([pull_req], "automerge_no_project", headers)
-            continue
+        for pull_req in all_pull_req:
+            last_comment = get_last_comment(pull_req["issue_url"], headers)
 
-        print(
-            f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: *** Not match, please check why!!!***")
+            if not last_comment:
+                list_no_comments.append(pull_req)
+                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: No Comments, new pr.")
+                continue
 
-    return (list_no_comments, list_with_diffs, list_no_changes, list_error)
+            if regexp_pr_diff.search(last_comment["body"]):
+                list_with_diffs.append(pull_req)
+                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: There are diffs or conflicts.")
+                continue
+
+            if regexp_pr_error.search(last_comment["body"]):
+                list_error.append(pull_req)
+                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Has errors.")
+                continue
+
+            if regexp_pr_no_changes.search(last_comment["body"]):
+                list_no_changes.append(pull_req)
+                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: No changes.")
+                continue
+
+            if regexp_new_version.search(last_comment["body"]):
+                list_to_be_closed.append(pull_req)
+                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: This PR will be closed since there is a new version of this dependency")
+                continue
+
+            if regexp_pr_still_working.search(last_comment["body"]):
+                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Atlantis is still working here, ignoring this PR for now.")
+                continue
+
+            if regexp_pr_ignore.search(last_comment["body"]):
+                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Will be ignored, there are diffs")
+                continue
+
+            if regexp_pr_no_project.search(last_comment["body"]):
+                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Will be ignored, 0 projects planned, usually due to modules update or no file changed, check and close them yourself please")
+                set_label_to_pull_request([pull_req], "automerge_no_project", headers)
+                continue
+
+            print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: *** Not match, please check why!!!***")
+
+        return (list_no_comments, list_with_diffs, list_no_changes, list_error, list_to_be_closed)
 
 def approve_all_prs(headers, all_pulls, github_user):
     """Approves all not approved PRs matching the filters from the config."""
@@ -373,6 +425,21 @@ def comment_pull_req(
 
         print(f"PR {pr['number']} Commented")
 
+def multi_comments_pull_req(pull_req: list, comment1: str, comment2: str, headers: dict):
+    """Appends two comments to the PR
+    :param pull_req: Pull request taken from the API
+    :type pull_req: list
+    :param comment1: First comment string to append
+    :type comment1: str
+    :param comment2: Second comment string to append
+    :type comment2: str
+    :param headers: Headers used in the API calls
+    :type headers: dict
+    """
+    comment_pull_req(pull_req, comment1, headers, update=False)
+    time.sleep(4)
+    comment_pull_req(pull_req, comment2, headers, update=False)
+
 def set_label_to_pull_request(pull_req: list, label: str, headers: dict):
     """Sets a label to a PR
     :param pull_req: Pull request taken from the API
@@ -433,7 +500,10 @@ def is_approved(url: str, github_user: str, headers: dict):
         if pr["user"]["login"] == github_user:
             if pr["state"] == "APPROVED":
                 return True
-            return False
+            elif pr["state"] == "DISMISSED":
+                return "Dismissed"
+            else:
+                return False
     return None
 
 
@@ -498,6 +568,10 @@ def merge_pull_req(pull_req: list, github_user, headers: dict):
         if not is_approved(pr["url"], github_user, headers):
             print(f"PR {pr['number']} Needs approving...")
             approve(pr["url"], headers)
+        elif is_approved(pr["url"], github_user, headers) == "Dismissed":
+            print(f"PR {pr['number']} Dismissed, check why ignoring...")
+            set_label_to_pull_request([pr], "automerge_dismissed", headers)
+            continue
         else:
             print(f"PR {pr['number']} Approved already")
 
