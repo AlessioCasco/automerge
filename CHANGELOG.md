@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2024-07-25
+- Increased timeout for state return to 4 min. 
+- Dependabot Pip: Bump certifi from 2024.2.2 to 2024.7.4 (#43)
+- Dependabot Pip: Bump urllib3 from 2.2.1 to 2.2.2 (#42)
+- Dependabot Github Actions: Bump docker/build-push-action from 5 to 6 (#41)
+- Dependabot Pip: Bump requests from 2.31.0 to 2.32.3 (#40)
+- Dependabot Pip: Bump certifi from 2024.2.2 to 2024.6.2 (#39)
+- Dependabot Pip: Bump pygments from 2.17.2 to 2.18.0 (#36)
+- Dependabot Pip: Bump idna from 3.6 to 3.7 (#35)
+
 ## [1.0.4] - 2024-03-08
 - Handle case when the PR has conflicts (dirty)
 - When renovate comments that there is a new version of the dependency, we close the PR and let it open a new one.

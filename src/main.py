@@ -375,7 +375,7 @@ def comment_pull_req(
             print(f"\n*** PR {pr['number']} ***\n")
 
             # # setting a timer for the mergeable state
-            timeout = time.time() + 60 * 2  # 2 min should be enough
+            timeout = time.time() + 60 * 4  # 4 min should be enough
             with console.status("[bold green]Waiting for mergeable state to return..."):
                 while mergeable_state == "unknown":
                     mergeable_state = get_mergeable_state(pr["url"], headers)
@@ -546,7 +546,7 @@ def merge_pull_req(pull_req: list, github_user, headers: dict):
         print(f"\n*** PR {pr['number']} ***\n")
 
         # # setting a timer for the mergeable state
-        timeout = time.time() + 60 * 2  # 2 min should be enough
+        timeout = time.time() + 60 * 4  # 4 min should be enough
         with console.status("[bold green]Waiting for mergeable state to return..."):
             while mergeable_state == "unknown":
                 mergeable_state = get_mergeable_state(pr["url"], headers)
@@ -575,7 +575,7 @@ def merge_pull_req(pull_req: list, github_user, headers: dict):
         else:
             print(f"PR {pr['number']} Approved already")
 
-        timeout = time.time() + 60 * 2  # 2 min should be enough
+        timeout = time.time() + 60 * 4  # 4 min should be enough
         with console.status("[bold green]Waiting for checks to pass..."):
             while mergeable_state != "clean":
                 mergeable_state = get_mergeable_state(pr["url"], headers)
