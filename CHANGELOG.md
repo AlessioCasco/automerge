@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ependabot Pip: Bump rich from 13.7.1 to 13.8.0 (48)
 
 ## [1.0.5] - 2024-07-25
-- Increased timeout for state return to 4 min. 
+- Increased timeout for state return to 4 min.
 - Dependabot Pip: Bump certifi from 2024.2.2 to 2024.7.4 (#43)
 - Dependabot Pip: Bump urllib3 from 2.2.1 to 2.2.2 (#42)
 - Dependabot Github Actions: Bump docker/build-push-action from 5 to 6 (#41)
