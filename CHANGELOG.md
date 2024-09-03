@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.0.6] - 2024-09-4
+- Fixes #7 adding the `--force` parameter
+- Dependabot Pip: Bump pygments from 2.17.2 to 2.18.0 (#45)
+- Dependabot Pip: Bump idna from 3.7 to 3.8 (#46)
+- Dependabot Pip: Bump certifi from 2024.7.4 to 2024.8.30 (#47)
+- ependabot Pip: Bump rich from 13.7.1 to 13.8.0 (48)
+
 ## [1.0.5] - 2024-07-25
 - Increased timeout for state return to 4 min. 
 - Dependabot Pip: Bump certifi from 2024.2.2 to 2024.7.4 (#43)

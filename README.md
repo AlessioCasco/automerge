@@ -99,7 +99,7 @@ Something like:
     * Approves the pull request and merges it
   * If the pull request is planned and has diffs:
     * Writes comment `This PR will be ignored by automerge` into the pull request, unlocks it and sets an `automerge_ignore` label.
-    * All future runs of Automerge will ignore this pull request (see Options to force this)
+    * All future runs of Automerge will ignore this pull request (see option `--force` to override this)
   * If the pull request was planned but had errors:
     * Automerge will try to plan it again
   * If the pull request was planned by no projects were actually planned (Usually happens when the pull request bumps something in a module and Atlantis )
@@ -112,5 +112,4 @@ Automerge ignores all pull requests having terraform differences or that result 
 * Automerge does not work really well with repos that have Atlantis set to automatic plan every time there is a change in the code. This conflicts with the syncing from master + the `atlantis plan` comments and may end up with errors shown in the comments.
   * We may add a parameter to the config where we define the behaviour of automerge for specific repos.
     * ie: instead of syncing from master and comment, we can only sync
-* [Doesn't have a --force option](https://github.com/AlessioCasco/automerge/issues/7)
 * Atlantis [doesn't have an API to unlock pull requests](https://github.com/runatlantis/atlantis/issues/733), so we can't unlock everything before starting automerge, this may result in automerge being unable to plan specific pull requests until the lock is manually released. A solution may be to intercept the message, unlock it and plan it on the next run.
