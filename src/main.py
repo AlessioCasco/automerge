@@ -22,6 +22,11 @@ def main():
             type=str,
             default="./config.json",
             help="JSON file holding the GitHub access token, default is ./config.json")
+        parser.add_argument(
+            "--force",
+            default=False,
+            action="store_true",
+            help="Skip all regex and plan every PR")
         # TODO: Add force option to force all PRs to be planned no matter if there are diffs
         # parser.add_argument(
         #     '--force',
@@ -65,7 +70,7 @@ def main():
             raise SystemExit(0)
 
         pr_list_no_comments, pr_with_diffs, pr_list_no_changes, pr_list_error, list_to_be_closed = create_pr_lists(
-            all_pulls, headers)
+            all_pulls, headers, args.force)
 
         if pr_list_no_changes:
             print("\nMerging what's possible\n")
@@ -227,7 +232,7 @@ def update_branch(pull_req_list: list, headers: dict):
 # TODO: Add label automerge_wont_touch for all PR's with diffs or no projects planned
 # Ignore all the ones with this label
 # https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28
-def create_pr_lists(all_pull_req: list, headers: dict):
+def create_pr_lists(all_pull_req: list, headers: dict, force: bool):
     """Returns a list of PRs base on some parameters
     :param all_pull_req: A list of pull requests taken from the API
     :type all_pull_req: list
@@ -293,40 +298,47 @@ def create_pr_lists(all_pull_req: list, headers: dict):
                 print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: No Comments, new pr.")
                 continue
 
-            if regexp_pr_diff.search(last_comment["body"]):
-                list_with_diffs.append(pull_req)
-                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: There are diffs or conflicts.")
-                continue
-
-            if regexp_pr_error.search(last_comment["body"]):
-                list_error.append(pull_req)
-                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Has errors.")
-                continue
-
             if regexp_pr_no_changes.search(last_comment["body"]):
                 list_no_changes.append(pull_req)
                 print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: No changes.")
                 continue
 
-            if regexp_new_version.search(last_comment["body"]):
-                list_to_be_closed.append(pull_req)
-                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: This PR will be closed since there is a new version of this dependency")
+            # If --force is enabled, we will plan all PRs to avoid automerge to ignore PRs that had issues (with the github webhooks as an example).
+            if force:
+                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Will be forced to plan")
+                list_no_comments.append(pull_req)
                 continue
+            else:
 
-            if regexp_pr_still_working.search(last_comment["body"]):
-                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Atlantis is still working here, ignoring this PR for now.")
-                continue
+                if regexp_pr_diff.search(last_comment["body"]):
+                    list_with_diffs.append(pull_req)
+                    print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: There are diffs or conflicts.")
+                    continue
 
-            if regexp_pr_ignore.search(last_comment["body"]):
-                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Will be ignored, there are diffs")
-                continue
+                if regexp_pr_error.search(last_comment["body"]):
+                    list_error.append(pull_req)
+                    print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Has errors.")
+                    continue
 
-            if regexp_pr_no_project.search(last_comment["body"]):
-                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Will be ignored, 0 projects planned, usually due to modules update or no file changed, check and close them yourself please")
-                set_label_to_pull_request([pull_req], "automerge_no_project", headers)
-                continue
+                if regexp_new_version.search(last_comment["body"]):
+                    list_to_be_closed.append(pull_req)
+                    print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: This PR will be closed since there is a new version of this dependency")
+                    continue
 
-            print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: *** Not match, please check why!!!***")
+                if regexp_pr_still_working.search(last_comment["body"]):
+                    print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Atlantis is still working here, ignoring this PR for now.")
+                    continue
+
+                if regexp_pr_ignore.search(last_comment["body"]):
+                    print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Will be ignored, there are diffs")
+                    continue
+
+                if regexp_pr_no_project.search(last_comment["body"]):
+                    print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: Will be ignored, 0 projects planned, usually due to modules update or no file changed, check and close them yourself please")
+                    set_label_to_pull_request([pull_req], "automerge_no_project", headers)
+                    continue
+
+                print(f"PR {pull_req['number']} in repo {pull_req['head']['repo']['name']}: *** Not match, please check why!!!***")
 
         return (list_no_comments, list_with_diffs, list_no_changes, list_error, list_to_be_closed)
 
